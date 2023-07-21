@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Courses</title>
+
+  <link href="css/explore.css" rel="stylesheet" />
+  <!-- fonts style -->
+  <link href="https://fonts.googleapis.com/css?family=Poppins:400,700|Raleway:400,600&display=swap" rel="stylesheet" />
+  <!-- font wesome stylesheet -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" />
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+</head>
+
+<body>
+
+  <body></body>
+
+  <div class="nav-bar">
+    <a class="navbar-brand" href="index.html">
+      <span> Coursetube </span>
+    </a>
+
+    <a class="navbar-import" href="#" id="import-button">
+      <span> Import Course </span>
+    </a>
+  </div>
+  <p class="nav-description">Enroll your favorite course now!!</p>
+
+  <div class="course-list" id="course-list"></div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
+    import {
+      getFirestore,
+      setDoc,
+      addDoc,
+      doc,
+      updateDoc,
+      deleteDoc,
+      getDoc,
+      query,
+      collection,
+      where,
+      getDocs,
+      onSnapshot
+    } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
+
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCT-jG3sIps1e0v_LNUXX8oEaiui1_OV1E",
+      authDomain: "coursetube-ac134.firebaseapp.com",
+      projectId: "coursetube-ac134",
+      storageBucket: "coursetube-ac134.appspot.com",
+      messagingSenderId: "1037924647195",
+      appId: "1:1037924647195:web:b27b1e1f0c92894451d3be",
+      measurementId: "G-V0HW8SXB74"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    // Initialize Cloud Firestore and get a reference to the service
+    const db = getFirestore(app);
+
+    submitData.addEventListener("click", (e) => {
+      var name = document.getElementById("course-name").value;
+      var url = document.getElementById("course-url").value;
+      var channelName = document.getElementById("channel-name").value;
+
+      let code = url.split("=")[2];
+      let img = url.split("=")[1].split("&")[0];
+
+      console.log(code);
+
+      addDoc(collection(db, "Courses"), {
+        name,
+        url: code,
+        img,
+        channelName,
+        isVerified: false
+      });
+
+      document.querySelector(".bg-modal").style.display = "none";
+
+    });
+
+    //   getAllData.addEventListener('click', (e) => {
+
+    // });
+
+    async function getAllData() {
+      await getDocs(collection(db, "Courses")).then((docSnap) => {
+        let users = [];
+        docSnap.forEach((doc) => {
+          if (doc.data().isVerified) {
+            users.push({ ...doc.data(), id: doc.id });
+          }
+        });
+        console.log("Document data:", users);
+        let listDiv = document.getElementById("course-list");
+        var nHTML = "";
+
+        users.forEach((item, id) => {
+          nHTML += `
+             <div class="course-1">
+         <div
+      id='course-item_${id}'
+
+              class="thumbnail">
+         
+             <img
+               src="https://img.youtube.com/vi/${item.img}/hqdefault.jpg"
+               alt=""
+             />
+         
+         </div>
+         <div class="description">
+           <p>${item.name}</p>
+           <p>${item.channelName}</p>
+         </div>
+       </div>`;
+
+          // let li = document.createElement("li");
+          // li.innerText = item;
+          // listDiv.appendChild(li);
+        });
+
+        document.getElementById("course-list").innerHTML = nHTML;
+
+        users.forEach((item, id) => {
+          document
+            .getElementById(`course-item_${id}`)
+            .addEventListener("click", (e) => {
+              localStorage.setItem("video", JSON.stringify(item));
+              window.location = "course.html";
+            });
+        });
+      });
+    }
+    getAllData();
+  </script>
+
+  <div class="bg-modal">
+    <div class="modal-contents">
+      <div class="close">+</div>
+
+      <form class="myform" action="#">
+        <input type="text" id="course-name" name="course-name" placeholder="Course name" />
+        <input type="text" id="channel-name" name="channel-name" placeholder="Channel name or Instructor name" />
+        <input type="text" id="course-url" name="course-url" placeholder="URL of the playlist" />
+
+        <input type="button" id="submitData" name="submitData" class="popup-button" value="Submit" />
+      </form>
+    </div>
+  </div>
+
+  <script src="js/explore.js"></script>
+</body>
+
+</html>
